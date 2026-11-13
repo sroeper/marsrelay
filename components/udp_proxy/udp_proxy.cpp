@@ -63,7 +63,8 @@ bool UdpProxy::is_ap_network(const network::IPAddress &ip) {
 uint32_t UdpProxy::request_destination() {
   if (!this->meter_on_ap_) {
     // Leaves through the default interface, which is the STA one.
-    return INADDR_BROADCAST;  // 255.255.255.255
+    return inet_aton("192.168.222.118")
+    //return INADDR_BROADCAST;  // 255.255.255.255
   }
   // 255.255.255.255 would also leave through the STA interface. The AP
   // subnet's own broadcast address is routed to the AP. Same /24 assumption
