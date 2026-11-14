@@ -63,8 +63,7 @@ bool UdpProxy::is_ap_network(const network::IPAddress &ip) {
 uint32_t UdpProxy::request_destination() {
   if (!this->meter_on_ap_) {
     // Leaves through the default interface, which is the STA one.
-    return inet_aton("192.168.222.118")
-    //return INADDR_BROADCAST;  // 255.255.255.255
+    return INADDR_BROADCAST;  // 255.255.255.255
   }
   // 255.255.255.255 would also leave through the STA interface. The AP
   // subnet's own broadcast address is routed to the AP. Same /24 assumption
@@ -343,7 +342,12 @@ void UdpProxy::process_requests() {
   memset(&broadcast_addr, 0, sizeof(broadcast_addr));
   broadcast_addr.sin_family = AF_INET;
   broadcast_addr.sin_port = htons(this->port_);
-  broadcast_addr.sin_addr.s_addr = this->request_destination();
+  if (this->port_ == 12345) {
+    ESP_LOGD(TAG, "forward to CT Meter")
+    inet_aton("192.168.222.118", &broadcast_addr.sin_addr.s_addr);
+  } else {
+    broadcast_addr.sin_addr.s_addr = this->request_destination();
+  }
 
   const char *meter_network = this->meter_on_ap_ ? "AP" : "STA";
   ssize_t sent = this->forward_socket_->sendto(this->buffer_, len, 0,
